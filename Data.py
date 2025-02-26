@@ -66,16 +66,15 @@ elif menu == "Input Data":
 elif menu == "Data & Pencarian":
     st.title("🔍 Pencarian Data Pengeluaran")
     st.write("Kode yang tersedia:")
-    st.write(df["Kode"].unique().tolist())
-    kode_cari = st.text_input("Masukkan Kode (5 karakter) untuk Pencarian", max_chars=5).upper()
+    st.markdown(", ".join(df["Kode"].unique().tolist()))
     
-    if kode_cari and len(kode_cari) == 5:
+    kode_cari = st.selectbox("Pilih Kode (5 karakter) untuk Pencarian", df["Kode"].unique().tolist(), index=0 if not df.empty else None)
+    
+    if kode_cari:
         hasil = df[df["Kode"] == kode_cari]
-        st.write("Hasil Pencarian:")
-        st.dataframe(hasil)
-    else:
-        st.warning("Masukkan kode yang valid (5 karakter)")
-
+        st.write("### Hasil Pencarian")
+        st.dataframe(hasil, use_container_width=True)
+    
     if st.button("Download CSV"):
         csv = df.to_csv(index=False).encode('utf-8')
         st.download_button(label="Unduh CSV", data=csv, file_name="pengeluaran_kas.csv", mime='text/csv')
@@ -84,7 +83,7 @@ elif menu == "Data & Pencarian":
 elif menu == "Kelola Data":
     st.title("✏️ Kelola Data")
     if not df.empty:
-        st.write(df)
+        st.write(df.style.set_properties(**{"background-color": "#f0f0f0", "border": "1px solid black"}))
         index = st.number_input("Masukkan Nomor Index untuk Edit/Hapus", min_value=0, max_value=len(df)-1, step=1)
         new_kode = st.text_input("Masukkan kode baru (5 karakter)", value=str(df.loc[index, "Kode"]).upper())
         if st.button("Edit Data"):
