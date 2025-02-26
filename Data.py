@@ -87,20 +87,19 @@ elif menu == "Kelola Data":
         st.write(df)
         index = st.number_input("Masukkan Nomor Index untuk Edit/Hapus", min_value=0, max_value=len(df)-1, step=1)
         new_kode = st.text_input("Masukkan kode baru (5 karakter)", value=str(df.loc[index, "Kode"]).upper())
-        
         if st.button("Edit Data"):
             if len(new_kode) != 5:
                 st.warning("Kode harus terdiri dari 5 karakter!")
-        else:
+            else:
                 df.loc[index, "Kode"] = new_kode
-        save_data(df)
-        st.success("Kode berhasil diperbarui!")
-        st.rerun() 
+                save_data(df)
+                st.success("Kode berhasil diperbarui!")
+                st.rerun()
         
         if st.button("Hapus Data"):
             df = df.drop(index).reset_index(drop=True)
             save_data(df)
             st.success("Data berhasil dihapus")
-            st.rerun() 
-        else:
-            st.warning("Belum ada data untuk dikelola.")
+            st.rerun()
+    else:
+        st.warning("Belum ada data untuk dikelola.")
