@@ -7,7 +7,7 @@ DATA_FILE = "pengeluaran_kas.csv"
 
 def load_data():
     if os.path.exists(DATA_FILE):
-        return pd.read_csv(DATA_FILE, dtype={"Kode": str})  # Pastikan kode tetap string
+        return pd.read_csv(DATA_FILE, dtype={"Kode": str})
     else:
         df = pd.DataFrame(columns=["Tanggal", "Kode", "Deskripsi", "Jumlah Barang", "Harga per Barang", "Total Harga"])
         df.to_csv(DATA_FILE, index=False)
@@ -45,18 +45,18 @@ if menu == "Dashboard":
 elif menu == "Input Data":
     st.title("📝 Input Pengeluaran Baru")
     tanggal = st.date_input("Tanggal")
-    kode = st.text_input("Kode (5 digit)", max_chars=5)
+    kode = st.text_input("Kode (5 karakter, bisa angka atau huruf)", max_chars=5)
     deskripsi = st.text_area("Deskripsi")
     jumlah_barang = st.number_input("Jumlah Barang", min_value=1)
     harga_per_barang = st.number_input("Harga per Barang", min_value=0)
     total_harga = jumlah_barang * harga_per_barang
 
     if st.button("Simpan Data"):
-        if not kode.isdigit() or len(kode) != 5:
-            st.warning("Kode harus berupa 5 digit angka!")
+        if len(kode) != 5:
+            st.warning("Kode harus terdiri dari 5 karakter!")
         else:
             tanggal_str = tanggal.strftime("%d-%m-%Y")
-            new_data = pd.DataFrame([[tanggal_str, kode, deskripsi, jumlah_barang, harga_per_barang, total_harga]], 
+            new_data = pd.DataFrame([[tanggal_str, kode.upper(), deskripsi, jumlah_barang, harga_per_barang, total_harga]], 
                                     columns=df.columns)
             df = pd.concat([df, new_data], ignore_index=True)
             save_data(df)
@@ -65,13 +65,16 @@ elif menu == "Input Data":
 # --- Data & Pencarian ---
 elif menu == "Data & Pencarian":
     st.title("🔍 Pencarian Data Pengeluaran")
-    kode_cari = st.text_input("Masukkan Kode (5 digit) untuk Pencarian", max_chars=5)
-    if kode_cari and kode_cari.isdigit() and len(kode_cari) == 5:
+    st.write("Kode yang tersedia:")
+    st.write(df["Kode"].unique().tolist())
+    kode_cari = st.text_input("Masukkan Kode (5 karakter) untuk Pencarian", max_chars=5).upper()
+    
+    if kode_cari and len(kode_cari) == 5:
         hasil = df[df["Kode"] == kode_cari]
         st.write("Hasil Pencarian:")
         st.dataframe(hasil)
     else:
-        st.warning("Masukkan kode yang valid (5 digit angka)")
+        st.warning("Masukkan kode yang valid (5 karakter)")
 
     if st.button("Download CSV"):
         csv = df.to_csv(index=False).encode('utf-8')
@@ -83,10 +86,10 @@ elif menu == "Kelola Data":
     if not df.empty:
         st.write(df)
         index = st.number_input("Masukkan Nomor Index untuk Edit/Hapus", min_value=0, max_value=len(df)-1, step=1)
-        new_kode = st.text_input("Masukkan kode baru (5 digit)", value=str(df.loc[index, "Kode"]))
+        new_kode = st.text_input("Masukkan kode baru (5 karakter)", value=str(df.loc[index, "Kode"]).upper())
         if st.button("Edit Data"):
-            if not new_kode.isdigit() or len(new_kode) != 5:
-                st.warning("Kode harus berupa 5 digit angka!")
+            if len(new_kode) != 5:
+                st.warning("Kode harus terdiri dari 5 karakter!")
             else:
                 df.loc[index, "Kode"] = new_kode
                 save_data(df)
